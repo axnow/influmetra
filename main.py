@@ -11,9 +11,15 @@ import pprint
 import requests
 import yaml
 import json
+
+from pymongo import MongoClient
 from TwitterAPI import TwitterAPI, TwitterPager
 
-prettyPrinter = pprint.PrettyPrinter
+prettyPrinter = pprint.PrettyPrinter(indent=4)
+# mongo setup:
+# TODO: move connection string to configuration
+mongoClient = MongoClient('mongodb://localhost:27017')
+mongoDb = mongoClient.influ
 
 
 def load_api_config(yaml_file):
@@ -26,15 +32,26 @@ def load_api_config(yaml_file):
             print(exc)
 
 
+def build_api():
+    api_config = load_api_config('/home/axnow/ttconfig.yaml')
+    api = TwitterAPI(api_config['tt-api']['key'], api_config['tt-api']['secret'], auth_type='oAuth2')
+    return api
+
+
 def list_lists(api, account):
     print(f'Trying to get list of lists for account @{account}')
-    response = api.request('lists/ownerships', {'screen_name': account})
-    if response.status_code == requests.codes.ok:
-        print(f'Headers:\n{response.headers}\n============\n')
-        json_print(response)
-
-    else:
-        print(f'Failed to perform request, result code: {response.status_code}, response: {response.text}')
+    res = []
+    pager = TwitterPager(api, 'lists/ownerships', {'screen_name': account, 'count': 20})
+    for response in pager.get_iterator(wait=5):
+        res.extend(response['lists'])
+    return res
+    # response = api.request('lists/ownerships', {'screen_name': account})
+    # if response.status_code == requests.codes.ok:
+    #     print(f'Headers:\n{response.headers}\n============\n')
+    #     json_print(response)
+    #
+    # else:
+    #     print(f'Failed to perform request, result code: {response.status_code}, response: {response.text}')
 
 
 def fetch_list_members(api, list_slug, owner_screen_name):
@@ -49,20 +66,15 @@ def fetch_list_members(api, list_slug, owner_screen_name):
         print(m.text)
 
 
-def build_api():
-    api_config = load_api_config('/home/axnow/ttconfig.yaml')
-    api = TwitterAPI(api_config['tt-api']['key'], api_config['tt-api']['secret'], auth_type='oAuth2')
-    return api
-
-
 # Press the green button in the gutter to run the script.
 def test_api():
     api = build_api()
     # r = api.request('statuses/show/:%d' % 210462857140252672)
     # jsonPrint(r)
     #
-    # list_lists(api, 'dziennikarz')
-    fetch_list_members(api, 'dziennikarze', 'dziennikarz')
+    lists = list_lists(api, 'dziennikarz')
+    prettyPrinter.pprint(lists)
+    # fetch_list_members(api, 'dziennikarze', 'dziennikarz')
     # print(r.text)
 
 
