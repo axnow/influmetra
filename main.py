@@ -58,10 +58,11 @@ def list_lists(api, account):
 def fetch_list_members(api, list_slug, owner_screen_name):
     print(f'Trying to fetch list {list_slug}')
     members = []
-    pager = TwitterPager(api, 'lists/members', {'slug': list_slug, 'owner_screen_name': owner_screen_name, 'count': 500})
+    pager = TwitterPager(api, 'lists/members',
+                         {'slug': list_slug, 'owner_screen_name': owner_screen_name, 'count': 500})
     for member in pager.get_iterator(wait=5):
         members.append(member)
-        print(f'Got another answer: {member}')
+        # print(f'Got another answer: {member}')
     print(f'Fetched successfully {len(members)} items.')
     return members
 
@@ -85,15 +86,15 @@ def json_print(r):
 def object_pretty_print(response):
     prettyPrinter.pprint(response.headers)
 
+#
+# def save_list(tt_list, members):
+#     print(f'Trying to save list {tt_list["full_name"]} with {len(members)}')
+#     tt_list['members'] = members
+#     tt_list['_id'] = tt_list['id']
+#     prettyPrinter.pprint(tt_list)
 
-def save_list(tt_list, members):
-    print(f'Trying to save list {tt_list["full_name"]} with {len(members)}')
-    tt_list['members'] = members
-    tt_list['_id'] = tt_list['id']
-    prettyPrinter.pprint(tt_list)
 
-
-def prepare_lists(api, account):
+def fetch_lists_with_members(api, account):
     lists = list_lists(api, account)
     res = []
     for l in lists:
@@ -103,10 +104,31 @@ def prepare_lists(api, account):
     return res
 
 
+def extract_list_member_stub(member):
+    stub_fields = ['id', 'name', 'screen_name']
+    res = dict()
+    for field in stub_fields:
+        res[field] = member[field]
+    return res
+
+
+def prepare_list_for_store(tt_list, members):
+    tt_list['members'] = list(map(extract_list_member_stub, members))
+    tt_list['_id'] = tt_list['id']
+    return tt_list
+
+
 def do_fetch_and_save_lists():
     api = build_api()
-    res = prepare_lists(api, 'dziennikarz')
-    prettyPrinter.pprint(res)
+    res = fetch_lists_with_members(api, 'dziennikarz')
+    tt_lists = []
+    tt_profiles = dict()
+    for tt_list, member_list in res:
+        tt_lists.append(prepare_list_for_store(tt_list, member_list))
+        for member in member_list:
+            tt_profiles[member['id']]=member
+    print('\nLists:\n')
+    prettyPrinter.pprint(tt_lists)
 
 
 if __name__ == '__main__':
