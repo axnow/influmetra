@@ -59,7 +59,7 @@ def fetch_list_members(api, list_slug, owner_screen_name):
     print(f'Trying to fetch list {list_slug}')
     members = []
     pager = TwitterPager(api, 'lists/members',
-                         {'slug': list_slug, 'owner_screen_name': owner_screen_name, 'count': 500})
+                         {'slug': list_slug, 'owner_screen_name': owner_screen_name, 'count': 1000})
     for member in pager.get_iterator(wait=5):
         members.append(member)
         # print(f'Got another answer: {member}')
@@ -86,6 +86,7 @@ def json_print(r):
 def object_pretty_print(response):
     prettyPrinter.pprint(response.headers)
 
+
 #
 # def save_list(tt_list, members):
 #     print(f'Trying to save list {tt_list["full_name"]} with {len(members)}')
@@ -97,6 +98,7 @@ def object_pretty_print(response):
 def fetch_lists_with_members(api, account):
     lists = list_lists(api, account)
     res = []
+    lists=list(lists)[0:2]
     for l in lists:
         print(f'Fetching members for list {l["full_name"]}...')
         list_members = fetch_list_members(api, l["slug"], account)
@@ -126,9 +128,19 @@ def do_fetch_and_save_lists():
     for tt_list, member_list in res:
         tt_lists.append(prepare_list_for_store(tt_list, member_list))
         for member in member_list:
-            tt_profiles[member['id']]=member
-    print('\nLists:\n')
-    prettyPrinter.pprint(tt_lists)
+            id = member['id']
+            member['_id'] = id
+            tt_profiles[id] = member
+    # print('\nLists:\n')
+    # prettyPrinter.pprint(tt_lists)
+    # print('\nProfiles:\n')
+    # prettyPrinter.pprint(tt_profiles)
+
+    print(f'Saving lists, got {len(tt_list)} items ({list(map(lambda l: l["full_name"], tt_lists))})')
+    mongoDb['lists'].insert_many(tt_list)
+    tt_profile_list = list(tt_profiles.values())
+    print(f'Saving profiles, got {len(tt_profile_list)} items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
+    mongoDb['profiles'].insert_many(list(tt_profiles.values()))
 
 
 if __name__ == '__main__':
