@@ -98,7 +98,7 @@ def object_pretty_print(response):
 def fetch_lists_with_members(api, account):
     lists = list_lists(api, account)
     res = []
-    lists=list(lists)[0:2]
+    # lists=list(lists)[0:2]
     for l in lists:
         print(f'Fetching members for list {l["full_name"]}...')
         list_members = fetch_list_members(api, l["slug"], account)
@@ -136,11 +136,14 @@ def do_fetch_and_save_lists():
     # print('\nProfiles:\n')
     # prettyPrinter.pprint(tt_profiles)
 
-    print(f'Saving lists, got {len(tt_list)} items ({list(map(lambda l: l["full_name"], tt_lists))})')
-    mongoDb['lists'].insert_many(tt_list)
+    print(f'Saving lists, got {len(tt_lists)} items ({list(map(lambda l: l["full_name"], tt_lists))})')
+    for tt_list in tt_lists:
+        mongoDb['lists'].update_one({'_id': tt_list['_id']}, {'$set': tt_list}, upsert=True)
     tt_profile_list = list(tt_profiles.values())
-    print(f'Saving profiles, got {len(tt_profile_list)} items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
-    mongoDb['profiles'].insert_many(list(tt_profiles.values()))
+    print(f'Saving profiles, got {len(tt_profile_list)}'
+          f' items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
+    for tt_profile in tt_profiles.values():
+        mongoDb['profiles'].update_one({'_id': tt_profile['_id']}, {'$set':tt_profile}, upsert=True)
 
 
 if __name__ == '__main__':
