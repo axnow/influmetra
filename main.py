@@ -12,14 +12,13 @@ import requests
 import yaml
 import json
 
+import repository
+# from repository import *
+
 from pymongo import MongoClient
 from TwitterAPI import TwitterAPI, TwitterPager
 
 prettyPrinter = pprint.PrettyPrinter(indent=4)
-# mongo setup:
-# TODO: move connection string to configuration
-mongoClient = MongoClient('mongodb://localhost:27017')
-mongoDb = mongoClient.influ
 
 
 def load_api_config(yaml_file):
@@ -120,6 +119,41 @@ def prepare_list_for_store(tt_list, members):
     return tt_list
 
 
+def fetch_followers_ids(api, user_id):
+    print(f'Fetching followers of {user_id}')
+    pager = TwitterPager(api, 'followers/ids', {'user_id': user_id})
+    followers = []
+    for follower in pager.get_iterator(wait=5):
+        followers.append(follower)
+        print(f'Got another answer: {follower}')
+    print(f'Fetched successfully {len(followers)} items.')
+    return followers
+
+
+def test_followers_api():
+    api = build_api()
+    ardanowski_id = "1055378302876241921"
+    print(f'Fetching followers of {ardanowski_id}')
+    followers = fetch_followers_ids(api, ardanowski_id)
+
+    prettyPrinter.pprint(followers)
+    print(f'Got total number of followers: {len(followers)}')
+
+
+def check_available_calls(api):
+    resp = api.request('application/rate_limit_status', {"resources": "followers,statuses,friends,trends,help"})
+    print(f'Got quota: {resp.get_quota()}')
+    return resp.json()
+
+
+def test_available_calls():
+    api = build_api()
+    limits = check_available_calls(api)
+    print(f'got limit response: ')
+    prettyPrinter.pprint(limits)
+
+
+
 def do_fetch_and_save_lists():
     api = build_api()
     res = fetch_lists_with_members(api, 'dziennikarz')
@@ -143,10 +177,17 @@ def do_fetch_and_save_lists():
     print(f'Saving profiles, got {len(tt_profile_list)}'
           f' items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
     for tt_profile in tt_profiles.values():
-        mongoDb['profiles'].update_one({'_id': tt_profile['_id']}, {'$set':tt_profile}, upsert=True)
+        mongoDb['profiles'].update_one({'_id': tt_profile['_id']}, {'$set': tt_profile}, upsert=True)
 
 
 if __name__ == '__main__':
-    do_fetch_and_save_lists()
+    repository.connect_db()
+    res = repository.select_profiles({})
+    prettyPrinter.pprint(res)
+    # test_repository()
+    # connect_db('asdef')
+    # show_db()
+    # test_followers_api()
+    # test_available_calls()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
