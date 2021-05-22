@@ -8,16 +8,16 @@ mongoClient = None
 mongoDb = None
 db_name = 'influ'
 
+profiles = None
+lists = None
 
-profiles=None
 
-
-def connect_mongo(connectionUrl=None):
-    if connectionUrl:
+def connect_mongo(connection_url=None):
+    if connection_url:
         global mongoConnectionUrl
-        mongoConnectionUrl = connectionUrl
+        mongoConnectionUrl = connection_url
     global mongoClient
-    mongoClient = MongoClient(connectionUrl)
+    mongoClient = MongoClient(connection_url)
 
 
 def connect_db(name='influ'):
@@ -28,8 +28,9 @@ def connect_db(name='influ'):
     global mongoDb
     mongoDb = mongoClient[db_name]
     global profiles
-    profiles=mongoDb.profiles
-
+    profiles = mongoDb.profiles
+    global lists
+    lists = mongoDb.lists
 
 
 def show_db():
@@ -40,9 +41,17 @@ def test_repository():
     print(f'Repository works...')
 
 
-def select_profiles(query):
-    return list(profiles.find(query))
+def profiles_by_tags(tags, projection=None):
+    return select_profiles({'influmetra.tags': {'$all': tags}}, projection)
+
+
+def select_profiles(query, projection=None):
+    return list(profiles.find(query, projection=projection))
 
 
 def store_profile(tt_profile):
-    mongoDb['profiles'].update_one({'_id': tt_profile['_id']}, {'$set': tt_profile}, upsert=True)
+    profiles.update_one({'_id': tt_profile['_id']}, {'$set': tt_profile}, upsert=True)
+
+
+def store_list(tt_list):
+    lists.update_one({'_id': tt_list['_id']}, {'$set': tt_list}, upsert=True)
