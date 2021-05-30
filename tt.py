@@ -19,7 +19,7 @@ def init_tt():
 
 
 def build_api():
-    api_config = configuration.load_configuration('/home/axnow/ttconfig.yaml')
+    api_config = configuration.config
     api = TwitterAPI(api_config['tt-api']['key'], api_config['tt-api']['secret'], auth_type='oAuth2')
     return api
 
@@ -56,3 +56,10 @@ def fetch_followers_ids(api, user_id):
         print(f'Got another answer: {follower}')
     print(f'Fetched successfully {len(followers)} items.')
     return followers
+
+
+def check_available_calls():
+    ensure_tt_initialized()
+    resp = tt_api.request('application/rate_limit_status', {"resources": "followers,statuses,friends,trends,help"})
+    print(f'Got quota: {resp.get_quota()}')
+    return resp.json()

@@ -8,6 +8,7 @@
 # https://github.com/geduldig/TwitterAPI
 import pprint
 
+import configuration
 import requests
 import yaml
 import json
@@ -33,6 +34,7 @@ def json_print(r):
 
 def object_pretty_print(response):
     prettyPrinter.pprint(response.headers)
+
 
 #
 # def save_list(tt_list, members):
@@ -67,8 +69,6 @@ def prepare_list_for_store(tt_list, members):
     return tt_list
 
 
-
-
 def test_followers_api():
     api = build_api()
     ardanowski_id = "1055378302876241921"
@@ -79,15 +79,8 @@ def test_followers_api():
     print(f'Got total number of followers: {len(followers)}')
 
 
-def check_available_calls(api):
-    resp = api.request('application/rate_limit_status', {"resources": "followers,statuses,friends,trends,help"})
-    print(f'Got quota: {resp.get_quota()}')
-    return resp.json()
-
-
 def test_available_calls():
-    api = build_api()
-    limits = check_available_calls(api)
+    limits = tt.check_available_calls()
     print(f'got limit response: ')
     prettyPrinter.pprint(limits)
 
@@ -119,14 +112,20 @@ def do_fetch_and_save_lists():
 
 
 if __name__ == '__main__':
-    repository.connect_db()
-    # res = repository.select_profiles({})
-    res = repository.profiles_by_tags(['posel'], ['name'])
-    prettyPrinter.pprint(res)
-    # test_repository()
-    # connect_db('asdef')
-    # show_db()
-    # test_followers_api()
-    # test_available_calls()
+    print('Loading configuration')
+    configuration.load_configuration()
+    print('Configuration loaded.')
+    test_available_calls()
+
+    #
+    # repository.connect_db()
+    # # res = repository.select_profiles({})
+    # res = repository.profiles_by_tags(['posel'], ['name'])
+    # prettyPrinter.pprint(res)
+    # # test_repository()
+    # # connect_db('asdef')
+    # # show_db()
+    # # test_followers_api()
+    # # test_available_calls()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

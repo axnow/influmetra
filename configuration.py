@@ -1,10 +1,13 @@
 # load the configuration file
+from pathlib import Path
 import yaml
 
+config = dict()
 
 
-def load_configuration(yaml_file='/home/axnow/ttconfig.yaml'):
+def load_configuration(yaml_file=str(Path.home()) + '/ttconfig.yaml'):
     print(f'Loading configuration from file {yaml_file}')
+    global config
     with open(yaml_file, 'r') as stream:
         try:
             config = yaml.safe_load(stream)
@@ -13,3 +16,4 @@ def load_configuration(yaml_file='/home/axnow/ttconfig.yaml'):
         except yaml.YAMLError as exc:
             print(f'Failed to load configuration from {yaml_file}')
             print(exc)
+
