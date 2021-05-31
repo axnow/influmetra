@@ -2,43 +2,39 @@
 # TODO: move connection string to configuration
 
 from pymongo import MongoClient
+import configuration
 
-mongoConnectionUrl = 'mongodb://localhost:27017'
-mongoClient = None
-mongoDb = None
-db_name = 'influ'
-
+mongo_client = None
+mongo_db = None
+db_name = None
 profiles = None
 lists = None
 
 
-def connect_mongo(connection_url=None):
-    if connection_url:
-        global mongoConnectionUrl
-        mongoConnectionUrl = connection_url
-    global mongoClient
-    mongoClient = MongoClient(connection_url)
+def connect():
+    config = configuration.config
+    connect_mongo(config)
+    connect_db(config['mongo']['db'])
+
+
+def connect_mongo(config):
+    mongo_config = config['mongo']
+    url = mongo_config['url']
+    global mongo_client
+    mongo_client = MongoClient(url)
 
 
 def connect_db(name='influ'):
     global db_name
     db_name = name
-    if not mongoClient:
+    if not mongo_client:
         connect_mongo()
-    global mongoDb
-    mongoDb = mongoClient[db_name]
+    global mongo_db
+    mongo_db = mongo_client[db_name]
     global profiles
-    profiles = mongoDb.profiles
+    profiles = mongo_db.profiles
     global lists
-    lists = mongoDb.lists
-
-
-def show_db():
-    print(f'Current db_name: {db_name}')
-
-
-def test_repository():
-    print(f'Repository works...')
+    lists = mongo_db.lists
 
 
 def profiles_by_tags(tags, projection=None):

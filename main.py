@@ -14,7 +14,6 @@ import yaml
 import json
 
 import repository
-# from repository import *
 
 import tt
 
@@ -112,11 +111,17 @@ def do_fetch_and_save_lists():
 
 
 if __name__ == '__main__':
+    #
     print('Loading configuration')
     configuration.load_configuration()
     print('Configuration loaded.')
-    test_available_calls()
+    # test_available_calls()
 
+    print('Repository testing:')
+    print('Connecting to db')
+    repository.connect()
+    res=repository.profiles_by_tags(['posel'], ['name'])
+    prettyPrinter.pprint(res)
     #
     # repository.connect_db()
     # # res = repository.select_profiles({})
