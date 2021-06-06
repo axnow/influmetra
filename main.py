@@ -110,17 +110,27 @@ def do_fetch_and_save_lists():
         repository.store_profile(tt_profile)
 
 
+def refresh_profiles_by_tags(tags):
+    resp = repository.profiles_by_tags(tags)
+    ids = [i['id'] for i in resp]
+    print(f'Got from repository: response: {resp}, converted to ids: {ids}')
+    # raise Exception('Just testing...')
+    users = tt.fetch_users_by_ids(ids)
+    print(f'Successfully got users: {users}')
+
 if __name__ == '__main__':
     #
     print('Loading configuration')
     configuration.load_configuration()
     print('Configuration loaded.')
     # test_available_calls()
+    repository.connect()
+    refresh_profiles_by_tags(['posel'])
 
     print('Repository testing:')
     print('Connecting to db')
     repository.connect()
-    res=repository.profiles_by_tags(['posel'], ['name'])
+    res = repository.profiles_by_tags(['posel'], ['name'])
     prettyPrinter.pprint(res)
     #
     # repository.connect_db()
