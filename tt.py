@@ -3,50 +3,75 @@ import configuration
 
 GET_USERS_LIMIT = 100
 
-tt_api = None
+tt_api11 = None
+tt_api2 = None
 
 
 def ensure_tt_initialized():
-    global tt_api
-    if not tt_api:
+    global tt_api11, tt_api2
+    if not tt_api11 or not tt_api2:
         print(f'Twitter connection not initialized, initializing...')
         init_tt()
 
 
 def init_tt():
     print(f'Initialiizing tt api...')
-    global tt_api
-    tt_api = build_api()
+    global tt_api2
+    tt_api2 = build_api('2')
+    global tt_api11
+    tt_api11 = build_api('1.1')
     print(f'Initialized tt_api successfully.')
 
 
-def build_api():
+def build_api(version):
     api_config = configuration.config
-    api = TwitterAPI(api_config['tt-api']['key'], api_config['tt-api']['secret'], auth_type='oAuth2', api_version='2')
+    api = TwitterAPI(api_config['tt-api']['key'], api_config['tt-api']['secret'], auth_type='oAuth2',
+                     api_version=version)
     return api
+
+
+# LIST MANAGEMENT
+def fetch_list(owner_screen_name, list_slug):
+    ensure_tt_initialized()
+    print(f"Fetching list {owner_screen_name}/{list_slug}")
+    resp = tt_api11.request("lists/show", {"owner_screen_name": owner_screen_name, "slug": list_slug})
+    list_json = resp.json()
+    print(f"Successfully got result list {owner_screen_name}/{list_slug}, id: {list_json['id']}")
+    return list_json
 
 
 def list_lists(account):
     ensure_tt_initialized()
     print(f'Trying to get list of lists for account @{account}')
     res = []
-    pager = TwitterPager(tt_api, 'lists/ownerships', {'screen_name': account, 'count': 20})
+    pager = TwitterPager(tt_api11, 'lists/ownerships', {'screen_name': account, 'count': 100})
     for response in pager.get_iterator(wait=5):
         res.extend(response['lists'])
     return res
 
 
-# def fetch_list_members(api, list_slug, owner_screen_name):
-def fetch_list_members(list_slug, owner_screen_name):
-    print(f'Trying to fetch list {list_slug}')
+def fetch_list_members_by_request(request):
     members = []
-    pager = TwitterPager(tt_api, 'lists/members',
-                         {'slug': list_slug, 'owner_screen_name': owner_screen_name, 'count': 1000})
+    if not 'count' in request:
+        request['count'] = 5000  # maximum permitted value is 5000 here
+    pager = TwitterPager(tt_api11, 'lists/members', request)
     for member in pager.get_iterator(wait=5):
         members.append(member)
         # print(f'Got another answer: {member}')
     print(f'Fetched successfully {len(members)} items.')
     return members
+
+
+# def fetch_list_members(api, list_slug, owner_screen_name):
+def fetch_list_members_by_slug(list_slug, owner_screen_name):
+    print(f'Trying to fetch list {list_slug}')
+    return fetch_list_members_by_request({'slug': list_slug, 'owner_screen_name': owner_screen_name})
+
+
+# def fetch_list_members(api, list_slug, owner_screen_name):
+def fetch_list_members_by_list_id(list_id):
+    print(f'Trying to fetch list with id {list_id}')
+    return fetch_list_members_by_request({'id': list_id})
 
 
 def fetch_followers_ids(api, user_id):

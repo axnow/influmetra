@@ -51,3 +51,6 @@ def store_profile(tt_profile):
 
 def store_list(tt_list):
     lists.update_one({'_id': tt_list['_id']}, {'$set': tt_list}, upsert=True)
+
+
+INFLUMETRA_PROPERTY = 'influmetra'

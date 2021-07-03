@@ -1,0 +1,35 @@
+How data is stored in mongo:
+
+Profiles:
+
+influ.profiles
+
+entry:
+{
+    _id: <twitter numerical id>
+    timestamp: //timestamp of latest retrieval
+    profile: { //profile as in api v2 }
+    profile_history:[
+            {
+                timestamp: <timestamp>
+                profile: {profile, apiv2}
+            }
+        ]
+    follows: [//ids of profiles followed by person    ]
+    followed_by [//ids of known folowers]
+    //follows history/followers history to be added when needed
+    tags: [//list of string tags used by program]
+}
+
+
+Lists:
+influ.lists
+
+{
+    _id: <twitter numerical id>
+    timestamp: <timestamp of last list retrieval>
+    list: <twitter list objecgt with details>
+    tags: [..] //tags to be attached to list items
+    members:[ <ids of list members>]
+    //list history to be added later if necessary
+}
