@@ -1,0 +1,40 @@
+
+Tags used in storage:
+
+politician
+mp
+former_mp
+mep
+former_mep
+party_leader
+journalist
+political_party
+government
+
+Lists:
+dziennikarz/
+    - {'member_count': 378, 'name': 'Posłowie Sejm IX kadencji', 'slug': 'pos-owie-sejm-ix-kadencji'} - mp, politician
+    - {'member_count': 129, 'name': 'Ministrowie-Zdrowia', 'slug': 'ministrowie-zdrowia'} - government
+    - {'member_count': 15, 'name': 'Koronawirus', 'slug': 'koronawirus'}
+    - {'member_count': 2, 'name': 'Wikipedia_Wikidata', 'slug': 'wikipedia-wikidata'}
+    - {'member_count': 8, 'name': 'liderzy_partii', 'slug': 'liderzy-partii'} - politician
+    - {'member_count': 17, 'name': 'Radni Krakow', 'slug': 'radni-krakow'}
+    - {'member_count': 8, 'name': 'partie-8-kadencja', 'slug': 'partie-8-kadencja'} - political_party
+    - {'member_count': 19, 'name': 'Breaking', 'slug': 'breaking'}
+    - {'member_count': 349, 'name': 'poslowie8', 'slug': 'poslowie8'} - politician, former_mp
+    - {'member_count': 190, 'name': 'poslowie7', 'slug': 'poslowie7'} - politician, former_mp
+    - {'member_count': 1458, 'name': 'NewspaperWorldwide', 'slug': 'newspaperworldwide'}
+    - {'member_count': 43, 'name': 'Kraków', 'slug': 'kraków'}
+    - {'member_count': 16, 'name': 'Kościół', 'slug': 'kościół'}
+    - {'member_count': 43, 'name': 'conclave', 'slug': 'conclave'}
+    - {'member_count': 93, 'name': 'Wiadomosci', 'slug': 'wiadomosci'}
+    - {'member_count': 60, 'name': 'Zagraniczni dziennikarze', 'slug': 'zagraniczni-dziennikarze'}
+    - {'member_count': 646, 'name': 'Politycy', 'slug': 'politycy'} - politician
+    - {'member_count': 38, 'name': 'Polskie media', 'slug': 'polskie-media'}
+    - {'member_count': 1507, 'name': 'Dziennikarze', 'slug': 'dziennikarze'} - journalist
+Europarl_PL
+    - {'member_count': 6, 'name': 'Grupy Polityczne PE', 'slug': 'grupy-polityczne-pe'}
+    - {'member_count': 22, 'name': 'Parlament Europejski', 'slug': 'parlament-europejski'}
+    - {'member_count': 33, 'name': 'Biura Informacyjne PE', 'slug': 'biura-informacyjne-pe'}
+    - {'member_count': 25, 'name': 'Komisje parlamentarne', 'slug': 'komisje-parlamentarne'}
+    - {'member_count': 46, 'name': 'Polscy eurodeputowani', 'slug': 'polscy-eurodeputowani'} - mep

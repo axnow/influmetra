@@ -42,21 +42,30 @@ def object_pretty_print(response):
 #     prettyPrinter.pprint(tt_list)
 
 
+def fetch_list_with_members(account, slug):
+    tt_list = tt.fetch_list(account, slug)
+    if not tt_list:
+        raise Exception(f'Unable to fetch list {account}/{slug}')
+    print(f'Fetching members for list {account}/{slug}...')
+    list_members = tt.fetch_list_members_by_slug(slug, account)
+    return tt_list, list_members
+
+
 def fetch_lists_with_members(account, list_slugs):
-    lists_by_slug = {}
     if not list_slugs:
         user_lists = tt.list_lists(account)
-        lists_by_slug = {l['slug']: l for l in user_lists}
-        list_slugs = list(lists_by_slug.keys())
-    res = []
+        list_slugs = [tt_list['slug'] for tt_list in user_lists]
+    res = list()
     for slug in list_slugs:
-        tt_list = tt.fetch_list(account,slug)
-        if not tt_list:
-            tt_list = tt.fetch_list(account, list_slugs)
-        print(f'Fetching members for list {account}/{slug}...')
-        list_members = tt.fetch_list_members_by_slug(slug, account)
+        tt_list, list_members = fetch_list_with_members(account, slug)
         res.append((tt_list, list_members))
     return res
+
+
+def fetch_and_save_list(account, slug, tags):
+    tt_list, tt_members_objects = fetch_list_with_members(account, slug)
+    member_ids = [tt_member['id'] for tt_member in tt_members_objects]
+    repository.save_list(tt_list, tags, member_ids, timestamp=None)
 
 
 def fetch_lists(account, list_slugs=[]):
@@ -68,19 +77,6 @@ def fetch_lists(account, list_slugs=[]):
             tt_lists.append(tt.fetch_list(account, slug))
         return tt_lists
 
-
-def extract_list_member_stub(member):
-    stub_fields = ['id', 'name', 'screen_name']
-    res = dict()
-    for field in stub_fields:
-        res[field] = member[field]
-    return res
-
-
-def prepare_list_for_store(tt_list, members):
-    tt_list['members'] = list(map(extract_list_member_stub, members))
-    tt_list['_id'] = tt_list['id']
-    return tt_list
 
 
 def test_followers_api():
@@ -99,30 +95,30 @@ def test_available_calls():
     prettyPrinter.pprint(limits)
 
 
-def do_fetch_and_save_lists():
-    api = build_api()
-    res = fetch_lists_with_members('dziennikarz')
-    tt_lists = []
-    tt_profiles = dict()
-    for tt_list, member_list in res:
-        tt_lists.append(prepare_list_for_store(tt_list, member_list))
-        for member in member_list:
-            id = member['id']
-            member['_id'] = id
-            tt_profiles[id] = member
-    # print('\nLists:\n')
-    # prettyPrinter.pprint(tt_lists)
-    # print('\nProfiles:\n')
-    # prettyPrinter.pprint(tt_profiles)
-
-    print(f'Saving lists, got {len(tt_lists)} items ({list(map(lambda l: l["full_name"], tt_lists))})')
-    for tt_list in tt_lists:
-        repository.store_list(tt_list)
-    tt_profile_list = list(tt_profiles.values())
-    print(f'Saving profiles, got {len(tt_profile_list)}'
-          f' items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
-    for tt_profile in tt_profiles.values():
-        repository.store_profile(tt_profile)
+# def do_fetch_and_save_lists():
+#     api = build_api()
+#     res = fetch_lists_with_members('dziennikarz')
+#     tt_lists = []
+#     tt_profiles = dict()
+#     for tt_list, member_list in res:
+#         tt_lists.append(prepare_list_for_store(tt_list, member_list))
+#         for member in member_list:
+#             id = member['id']
+#             member['_id'] = id
+#             tt_profiles[id] = member
+#     # print('\nLists:\n')
+#     # prettyPrinter.pprint(tt_lists)
+#     # print('\nProfiles:\n')
+#     # prettyPrinter.pprint(tt_profiles)
+#
+#     print(f'Saving lists, got {len(tt_lists)} items ({list(map(lambda l: l["full_name"], tt_lists))})')
+#     for tt_list in tt_lists:
+#         repository.store_list(tt_list)
+#     tt_profile_list = list(tt_profiles.values())
+#     print(f'Saving profiles, got {len(tt_profile_list)}'
+#           f' items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
+#     for tt_profile in tt_profiles.values():
+#         repository.store_profile(tt_profile)
 
 
 # Refresh all the profiles on the list, with update
@@ -172,9 +168,20 @@ def show_lists(account):
 
 
 def test_list_fetching():
-    show_lists("dziennikarz")
-    show_lists("Europarl_PL")
-    fetch_lists_with_members("Europarl_PL", ["polscy-eurodeputowani"])
+    # show_lists("dziennikarz")
+    # show_lists("Europarl_PL")
+    tt_list, tt_list_members = fetch_list_with_members("Europarl_PL", "polscy-eurodeputowani")
+    print(f'Got successfully list for europarliment, with {len(tt_list_members)} members.')
+    print_list(tt_list)
+    prettyPrinter.pprint(tt_list_members)
+
+def test_fetch_and_save_list():
+    lists= [
+        ("Europarl_PL", "polscy-eurodeputowani", ['mep'])
+    ]
+    for account, slug, tags in lists:
+        print(f'Fetching and saving list: {account}/{slug} with tags: {tags}')
+        fetch_and_save_list(account, slug, tags)
 
 
 if __name__ == '__main__':
@@ -185,7 +192,8 @@ if __name__ == '__main__':
     # test_available_calls()
     repository.connect()
 
-    test_list_fetching()
+    test_fetch_and_save_list()
+    # test_list_fetching()
     exit(0)
     refresh_profiles_by_tags(['posel'])
 

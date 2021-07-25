@@ -28,7 +28,7 @@ influ.lists
 {
     _id: <twitter numerical id>
     timestamp: <timestamp of last list retrieval>
-    list: <twitter list objecgt with details>
+    list: <twitter list object with details>
     tags: [..] //tags to be attached to list items
     members:[ <ids of list members>]
     //list history to be added later if necessary

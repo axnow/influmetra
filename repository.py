@@ -1,5 +1,6 @@
 # mongo setup:
 # TODO: move connection string to configuration
+import datetime
 
 from pymongo import MongoClient
 import configuration
@@ -9,6 +10,8 @@ mongo_db = None
 db_name = None
 profiles = None
 lists = None
+
+INFLUMETRA_PROPERTY = 'influmetra'
 
 
 def connect():
@@ -53,4 +56,14 @@ def store_list(tt_list):
     lists.update_one({'_id': tt_list['_id']}, {'$set': tt_list}, upsert=True)
 
 
-INFLUMETRA_PROPERTY = 'influmetra'
+def save_list(tt_list_object, tags, member_ids, timestamp):
+    if not tags:
+        tags = []
+    if not timestamp:
+        timestamp = datetime.datetime.now()
+
+    mongo_entry = {'_id': tt_list_object['id'], 'list': tt_list_object, 'tags': tags, 'timestamp': timestamp,
+                   'full_name': tt_list_object['full_name']}
+    if member_ids:
+        mongo_entry['members'] = member_ids
+    lists.update_one({'_id': mongo_entry['_id']}, {"$set": mongo_entry}, upsert=True)
