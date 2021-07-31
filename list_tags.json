@@ -7,5 +7,5 @@
 { "owner": "dziennikarz" , "member_count": 190, "name": "poslowie7", "slug": "poslowie7", "tags": ["politician", "former_mp"]},
 { "owner": "dziennikarz" , "member_count": 646, "name": "Politycy", "slug": "politycy", "tags": ["politician"]},
 { "owner": "dziennikarz" , "member_count": 1507, "name": "Dziennikarze", "slug": "dziennikarze", "tags": ["journalist"]},
-{ "owner": "Europarl_PL" , "member_count": 46, "name": "Polscy eurodeputowani", "slug": "polscy-eurodeputowani", "tags": ["mep"]}
+{ "owner": "Europarl_PL" , "member_count": 46, "name": "Polscy eurodeputowani", "slug": "polscy-eurodeputowani", "tags": ["mep", "politician"]}
   ]

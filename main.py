@@ -34,12 +34,6 @@ def object_pretty_print(response):
     prettyPrinter.pprint(response.headers)
 
 
-#
-# def save_list(tt_list, members):
-#     print(f'Trying to save list {tt_list["full_name"]} with {len(members)}')
-#     tt_list['members'] = members
-#     tt_list['_id'] = tt_list['id']
-#     prettyPrinter.pprint(tt_list)
 
 
 def fetch_list_with_members(account, slug):
@@ -79,6 +73,8 @@ def fetch_lists(account, list_slugs=[]):
 
 
 
+
+
 def test_followers_api():
     api = build_api()
     ardanowski_id = "1055378302876241921"
@@ -93,6 +89,13 @@ def test_available_calls():
     limits = tt.check_available_calls()
     print(f'got limit response: ')
     prettyPrinter.pprint(limits)
+
+
+def read_lists_definition():
+    list_file = 'list_tags.json'
+    with open(list_file) as file:
+        data = json.load(file)
+    return data
 
 
 # def do_fetch_and_save_lists():
@@ -166,22 +169,29 @@ def show_lists(account):
     for tt_list in tt_lists:
         print_list(tt_list)
 
+#
+# def test_list_fetching():
+#     # show_lists("dziennikarz")
+#     # show_lists("Europarl_PL")
+#     tt_list, tt_list_members = fetch_list_with_members("Europarl_PL", "polscy-eurodeputowani")
+#     print(f'Got successfully list for europarliment, with {len(tt_list_members)} members.')
+#     print_list(tt_list)
+#     prettyPrinter.pprint(tt_list_members)
+#
+#
+# def test_fetch_and_save_list():
+#     lists = [
+#         ("Europarl_PL", "polscy-eurodeputowani", ['mep'])
+#     ]
+#     for account, slug, tags in lists:
+#         print(f'Fetching and saving list: {account}/{slug} with tags: {tags}')
+#         fetch_and_save_list(account, slug, tags)
 
-def test_list_fetching():
-    # show_lists("dziennikarz")
-    # show_lists("Europarl_PL")
-    tt_list, tt_list_members = fetch_list_with_members("Europarl_PL", "polscy-eurodeputowani")
-    print(f'Got successfully list for europarliment, with {len(tt_list_members)} members.')
-    print_list(tt_list)
-    prettyPrinter.pprint(tt_list_members)
 
-def test_fetch_and_save_list():
-    lists= [
-        ("Europarl_PL", "polscy-eurodeputowani", ['mep'])
-    ]
-    for account, slug, tags in lists:
-        print(f'Fetching and saving list: {account}/{slug} with tags: {tags}')
-        fetch_and_save_list(account, slug, tags)
+def update_and_save_lists():
+    ldefs = read_lists_definition()
+    for ldef in ldefs:
+        fetch_and_save_list(ldef['owner'], ldef['slug'], ldef['tags'])
 
 
 if __name__ == '__main__':
@@ -191,8 +201,8 @@ if __name__ == '__main__':
     print('Configuration loaded.')
     # test_available_calls()
     repository.connect()
-
-    test_fetch_and_save_list()
+    update_and_save_lists()
+    # test_fetch_and_save_list()
     # test_list_fetching()
     exit(0)
     refresh_profiles_by_tags(['posel'])
