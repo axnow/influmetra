@@ -34,8 +34,6 @@ def object_pretty_print(response):
     prettyPrinter.pprint(response.headers)
 
 
-
-
 def fetch_list_with_members(account, slug):
     tt_list = tt.fetch_list(account, slug)
     if not tt_list:
@@ -72,9 +70,6 @@ def fetch_lists(account, list_slugs=[]):
         return tt_lists
 
 
-
-
-
 def test_followers_api():
     api = build_api()
     ardanowski_id = "1055378302876241921"
@@ -96,32 +91,6 @@ def read_lists_definition():
     with open(list_file) as file:
         data = json.load(file)
     return data
-
-
-# def do_fetch_and_save_lists():
-#     api = build_api()
-#     res = fetch_lists_with_members('dziennikarz')
-#     tt_lists = []
-#     tt_profiles = dict()
-#     for tt_list, member_list in res:
-#         tt_lists.append(prepare_list_for_store(tt_list, member_list))
-#         for member in member_list:
-#             id = member['id']
-#             member['_id'] = id
-#             tt_profiles[id] = member
-#     # print('\nLists:\n')
-#     # prettyPrinter.pprint(tt_lists)
-#     # print('\nProfiles:\n')
-#     # prettyPrinter.pprint(tt_profiles)
-#
-#     print(f'Saving lists, got {len(tt_lists)} items ({list(map(lambda l: l["full_name"], tt_lists))})')
-#     for tt_list in tt_lists:
-#         repository.store_list(tt_list)
-#     tt_profile_list = list(tt_profiles.values())
-#     print(f'Saving profiles, got {len(tt_profile_list)}'
-#           f' items ({list(map(lambda p: p["name"], tt_profile_list))[0:50]})')
-#     for tt_profile in tt_profiles.values():
-#         repository.store_profile(tt_profile)
 
 
 # Refresh all the profiles on the list, with update
@@ -169,6 +138,7 @@ def show_lists(account):
     for tt_list in tt_lists:
         print_list(tt_list)
 
+
 #
 # def test_list_fetching():
 #     # show_lists("dziennikarz")
@@ -194,6 +164,36 @@ def update_and_save_lists():
         fetch_and_save_list(ldef['owner'], ldef['slug'], ldef['tags'])
 
 
+def update_list_members_profiles():
+    lists = repository.select_lists(projection={'full_name': 1, 'tags': 1, 'members': 1})
+    print(f'Fetched {len(lists)} lists from repository')
+    # profile_id_set = set()
+    profile_id_tags=dict()
+    for tt_list in lists:
+        for m_id in tt_list['members']:
+            if not m_id in profile_id_tags:
+                profile_id_tags[m_id]=set(tt_list['tags'])
+            else:
+                for tag in tt_list['tags']:
+                    profile_id_tags[m_id].add(tag)
+            # profile_id_set.add(m_id)
+    member_count = sum([len(l['members']) for l in lists])
+    print(f'After reducing to set got {len(profile_id_tags)} vs original member sum: {member_count}')
+    print(f'Preparing to fetch')
+    profile_ids = list(profile_id_tags.keys())
+    # profile_ids = profile_ids[:10]
+    profiles = tt.fetch_users_by_ids(profile_ids)
+    print(f'Got {len(profiles)} items in result.')
+    saved=0
+    for tt_profile in profiles:
+        tags = list(profile_id_tags[int(tt_profile['id'])])
+        repository.save_profile(tt_profile, tags)
+        saved += 1
+        if saved % 100 == 0:
+            print(f'Successfully saved {saved} profiles, last one: {tt_profile["id"]} {tt_profile["name"]}')
+    #and now try to add tags to profiles.
+
+
 if __name__ == '__main__':
     #
     print('Loading configuration')
@@ -201,7 +201,9 @@ if __name__ == '__main__':
     print('Configuration loaded.')
     # test_available_calls()
     repository.connect()
-    update_and_save_lists()
+
+    update_list_members_profiles()
+    # update_and_save_lists()
     # test_fetch_and_save_list()
     # test_list_fetching()
     exit(0)

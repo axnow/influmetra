@@ -1,7 +1,9 @@
 from TwitterAPI import TwitterAPI, TwitterPager
 import configuration
+import time
 
 GET_USERS_LIMIT = 100
+GET_USERS_DELAY = 3
 
 tt_api11 = None
 tt_api2 = None
@@ -108,9 +110,13 @@ def fetch_users_by_ids(ids):
                               'withheld']
 
     user_expansion_str = ",".join(default_user_expansion)
-    response = tt_api.request('users', {'ids': ",".join([str(id) for id in chunks[0]]),
-                                        'user.fields': user_expansion_str})
-    print(f'got response: {response}, status code: {response.status_code}, text={response.text}')
-    response.response.raise_for_status()
-    val = response.json()['data']
-    return val
+    res = list()
+    for ids_chunk in chunks:
+        time.sleep(GET_USERS_DELAY)
+        response = tt_api2.request('users', {'ids': ",".join([str(id) for id in ids_chunk]),
+                                             'user.fields': user_expansion_str})
+        print(f'got response: {response}, status code: {response.status_code}, text={response.text}')
+        response.response.raise_for_status()
+        val = response.json()['data']
+        res.extend(val)
+    return res

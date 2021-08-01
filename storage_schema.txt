@@ -8,6 +8,7 @@ entry:
 {
     _id: <twitter numerical id>
     timestamp: //timestamp of latest retrieval
+    name: <name of the porofile, for ad hoc view/operation>
     profile: { //profile as in api v2 }
     profile_history:[
             {
@@ -28,6 +29,7 @@ influ.lists
 {
     _id: <twitter numerical id>
     timestamp: <timestamp of last list retrieval>
+    full_name: <full name of the list, for ease of the query/ad hoc operation>
     list: <twitter list object with details>
     tags: [..] //tags to be attached to list items
     members:[ <ids of list members>]

@@ -1,6 +1,5 @@
 [
 { "owner": "dziennikarz" , "member_count": 378, "name": "Posłowie Sejm IX kadencji", "slug": "pos-owie-sejm-ix-kadencji", "tags": ["mp", "politician"]},
-{ "owner": "dziennikarz" , "member_count": 129, "name": "Ministrowie-Zdrowia", "slug": "ministrowie-zdrowia", "tags": ["government"]},
 { "owner": "dziennikarz" , "member_count": 8, "name": "liderzy_partii", "slug": "liderzy-partii", "tags": ["politician"]},
 { "owner": "dziennikarz" , "member_count": 8, "name": "partie-8-kadencja", "slug": "partie-8-kadencja", "tags": ["political_party"]},
 { "owner": "dziennikarz" , "member_count": 349, "name": "poslowie8", "slug": "poslowie8", "tags": ["politician", "former_mp"]},

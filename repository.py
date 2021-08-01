@@ -48,8 +48,28 @@ def select_profiles(query, projection=None):
     return list(profiles.find(query, projection=projection))
 
 
-def store_profile(tt_profile):
-    profiles.update_one({'_id': tt_profile['_id']}, {'$set': tt_profile}, upsert=True)
+def get_profile(id):
+    return profiles.find_one({'_id': id})
+
+
+def save_profile(tt_profile, tags=None, timestamp=datetime.datetime.now()):
+    profile_id = int(tt_profile['id'])
+    orig_profile = get_profile(profile_id)
+    if orig_profile:
+        mongo_entry = {
+            'profile': tt_profile,
+            'timestamp': timestamp,
+            'name': tt_profile['name']
+        }
+        if tags:
+            mongo_entry['tags'] = tags
+        history_extension = {
+            'profile_history': {'timestamp': orig_profile['profile'], 'profile': orig_profile['profile']}}
+        profiles.update_one({'_id': profile_id}, {'$set': mongo_entry, '$push': history_extension})
+    else:
+        mongo_entry = {'_id': profile_id, 'profile': tt_profile, 'tags': tags if tags else [], 'timestamp': timestamp,
+                       'name': tt_profile['name'], 'profile_history': []}
+        profiles.update_one({'_id': profile_id}, {'$set': mongo_entry}, upsert=True)
 
 
 def store_list(tt_list):
@@ -67,3 +87,9 @@ def save_list(tt_list_object, tags, member_ids, timestamp):
     if member_ids:
         mongo_entry['members'] = member_ids
     lists.update_one({'_id': mongo_entry['_id']}, {"$set": mongo_entry}, upsert=True)
+
+
+def select_lists(query=None, projection=None):
+    if not query:
+        query = {}
+    return list(lists.find(query, projection=projection))
